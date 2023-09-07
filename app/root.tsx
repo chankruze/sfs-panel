@@ -1,5 +1,5 @@
-import { cssBundleHref } from "@remix-run/css-bundle";
-import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
+import { cssBundleHref } from '@remix-run/css-bundle';
+import type { LinksFunction, V2_MetaFunction } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -7,20 +7,20 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "@remix-run/react";
-import stylesheet from "~/globals.css";
-import { SITE_DESCRIPTION, SITE_TITLE } from "./consts";
+} from '@remix-run/react';
+import stylesheet from '~/globals.css';
+import { SITE_DESCRIPTION, SITE_TITLE } from './consts';
 
 export const meta: V2_MetaFunction = () => {
   return [
     { title: SITE_TITLE },
-    { name: "description", content: SITE_DESCRIPTION },
+    { name: 'description', content: SITE_DESCRIPTION },
   ];
 };
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
-  ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: 'stylesheet', href: stylesheet },
+  ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
 ];
 
 export default function App() {
