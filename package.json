@@ -2,9 +2,10 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
-    "build": "remix build",
+    "build": "npm run build:prisma && remix build",
     "dev": "remix dev",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "build:prisma": "pnpx prisma db push"
   },
   "prisma": {
     "seed": "pnpx ts-node prisma/seed.ts"
