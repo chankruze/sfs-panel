@@ -25,7 +25,7 @@ export const FormField: FC<FormFieldProps> = ({
   }, [error]);
 
   return (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
+    <div className="grid w-full gap-2">
       {label ? (
         <Label htmlFor={id} className="capitalize">
           {label}
@@ -43,7 +43,7 @@ export const FormField: FC<FormFieldProps> = ({
         placeholder={placeholder}
       />
       {errorText ? (
-        <p className="font-mono text-sm text-red-400">{errorText}</p>
+        <p className="text-sm text-red-500">{errorText}</p>
       ) : null}
     </div>
   );
