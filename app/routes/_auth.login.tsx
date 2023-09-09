@@ -25,6 +25,10 @@ export const meta: V2_MetaFunction = () => {
       property: 'og:title',
       content: `Login / ${SITE_TITLE}`,
     },
+    {
+      name: 'description',
+      content: `Authentication is required to access ${SITE_TITLE}`,
+    },
   ];
 };
 

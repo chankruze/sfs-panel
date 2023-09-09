@@ -1,5 +1,5 @@
-import { useMatches } from "@remix-run/react";
-import { useMemo } from "react";
+import { useMatches } from '@remix-run/react';
+import { useMemo } from 'react';
 
 const DEFAULT_REDIRECT = '/';
 
@@ -40,4 +40,15 @@ export function useMatchesData(
     [matchingRoutes, id]
   );
   return route?.data;
+}
+
+export function avatarTextFromName(name: string): string {
+  const nameParts = name.split(' ');
+
+  if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+
+  if (nameParts.length >= 2)
+    return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();
+
+  return name;
 }
