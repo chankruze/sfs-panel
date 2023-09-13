@@ -16,7 +16,7 @@ export default function Index() {
   const { user } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full w-full overflow-hidden">
       {/* sidebar */}
       <aside className="flex flex-col gap-6 bg-primary p-4 text-primary-foreground lg:w-1/6">
         {/* brand */}
