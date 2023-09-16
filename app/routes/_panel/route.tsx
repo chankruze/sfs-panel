@@ -13,7 +13,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ user });
 };
 
-export default function Index() {
+export default function PanelLayout() {
   const { user } = useLoaderData<typeof loader>();
 
   return (
@@ -40,12 +40,12 @@ export default function Index() {
       </aside>
       {/* outlet */}
       <main className="flex-1 overflow-y-auto">
-        {/* <Outlet /> */}
-        <div className="flex h-full items-center justify-center">
+        <Outlet />
+        {/* <div className="flex w-full h-full items-center justify-center">
           <div className="font-outfit text-6xl font-medium">
             <Outlet />
           </div>
-        </div>
+        </div> */}
       </main>
       {/* mobile bottom navbar */}
       <nav className="bg-primary text-primary-foreground sm:hidden">

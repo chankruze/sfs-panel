@@ -1,8 +1,4 @@
-import type {
-  ActionFunction,
-  LoaderFunction,
-  V2_MetaFunction,
-} from '@remix-run/node';
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Form, useActionData, useNavigation } from '@remix-run/react';
 import type { ChangeEvent } from 'react';
@@ -37,13 +33,13 @@ const schema = Yup.object({
   password: Yup.string().required('Password is required'),
 });
 
-export const loader: LoaderFunction = async ({ request }) => {
+export async function loader({ request }: LoaderArgs) {
   const user = await getUser(request);
   if (user) return redirect('/');
   return null;
-};
+}
 
-export const action: ActionFunction = async ({ request }) => {
+export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const redirectTo = safeRedirect(formData.get('redirectTo'), '/');
   const remember = formData.get('remember');
@@ -69,7 +65,7 @@ export const action: ActionFunction = async ({ request }) => {
     // return error to render in the components
     return json({ errors }, { status: 400 });
   }
-};
+}
 
 export default function Login() {
   const actionData = useActionData();
