@@ -1,7 +1,7 @@
 import { NavLink } from '@remix-run/react';
 import { cn } from '~/lib/utils';
 
-type NavItemProps = {
+export type NavItemProps = {
   to: string;
   label: string;
 };

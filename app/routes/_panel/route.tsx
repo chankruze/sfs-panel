@@ -3,6 +3,7 @@ import { json, redirect } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { SITE_TITLE } from '~/consts';
 import { getUser } from '~/lib/session.server';
+import { BottomNavList } from './bottom-nav-list';
 import { NavList } from './nav-list';
 import { UserProfile } from './user-profile';
 
@@ -16,11 +17,11 @@ export default function Index() {
   const { user } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden sm:flex-row">
       {/* sidebar */}
-      <aside className="flex flex-col gap-6 bg-primary p-4 text-primary-foreground lg:w-1/6">
+      <aside className="hidden flex-col gap-6 bg-primary p-4 text-primary-foreground sm:flex lg:w-1/6">
         {/* brand */}
-        <h1 className="font-montserrat py-6 text-center font-semibold uppercase text-yellow-400 lg:text-3xl">
+        <h1 className="py-6 text-center font-montserrat font-semibold uppercase text-yellow-400 lg:text-3xl">
           {SITE_TITLE}
         </h1>
         {/* nav links */}
@@ -46,6 +47,10 @@ export default function Index() {
           </div>
         </div>
       </main>
+      {/* mobile bottom navbar */}
+      <nav className="bg-primary text-primary-foreground sm:hidden">
+        <BottomNavList />
+      </nav>
     </div>
   );
 }
