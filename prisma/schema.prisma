@@ -41,3 +41,49 @@ model Password {
   @@unique([userId], map: "users")
   @@map("passwords")
 }
+
+model Customer {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  phone String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  connections Connection[]
+
+  @@map("customers")
+}
+
+model Plan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  price       Float
+  speed       Int
+  isSpecial   Boolean
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  connections Connection[]
+
+  @@map("plans")
+}
+
+model Connection {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // when a plan is deleted don't delete the connection, instead
+  // set it's plan field to null, allow admin to change plan
+  planId String? @db.ObjectId
+  plan   Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("connections")
+}
