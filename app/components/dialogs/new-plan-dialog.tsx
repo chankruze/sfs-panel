@@ -1,16 +1,15 @@
 import { useFetcher } from '@remix-run/react';
 import { Button } from '~/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '~/components/ui/sheet';
 import { useDialog } from '~/hooks/use-dialog-store';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
@@ -21,25 +20,22 @@ export const NewPlanDialog = () => {
 
   const isDialogOpen = isOpen && type === 'createPlan';
 
-  const handleClose = () => {
-    // form.reset();
+  const submitForm = () => {
     onClose();
   };
 
   return (
-    <Sheet open={isDialogOpen} onOpenChange={handleClose}>
-      {/* <SheetTrigger asChild>
-        <Button variant="outline">Open</Button>
-      </SheetTrigger> */}
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Add New Plan</SheetTitle>
-          <SheetDescription>
+    <Dialog open={isDialogOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Plan</DialogTitle>
+          <DialogDescription>
             Enter the details required for creating a new plan.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <fetcher.Form
           className="grid gap-4 py-4"
+          onSubmit={submitForm}
           method="post"
           action="/plans/create"
         >
@@ -92,15 +88,13 @@ export const NewPlanDialog = () => {
             </Label>
             <Checkbox id="is-special" name="is-special" />
           </div>
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button type="submit" name="__action">
-                Save
-              </Button>
-            </SheetClose>
-          </SheetFooter>
+          <DialogFooter>
+            <Button type="submit" name="__action" value="create">
+              Save
+            </Button>
+          </DialogFooter>
         </fetcher.Form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };
