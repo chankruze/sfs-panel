@@ -1,8 +1,23 @@
 import { json, type ActionArgs } from '@remix-run/node';
+import { z } from 'zod';
 import { getUser } from '~/lib/session.server';
-import type { CreatePlanProps } from '~/models/plan.server';
 import { createPlan } from '~/models/plan.server';
 import { formToJSON } from '~/utils/form.server';
+
+export const newPlanSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: 'name must contain at least 1 character' }),
+    speed: z.string().min(1, { message: 'speed must be a positive number' }),
+    price: z.string().min(1, { message: 'price must be a positive number' }),
+    description: z.string(),
+  })
+  .required({
+    name: true,
+    speed: true,
+    price: true,
+  });
 
 export async function action({ request }: ActionArgs) {
   const user = await getUser(request);
@@ -24,25 +39,33 @@ export async function action({ request }: ActionArgs) {
     );
 
   const formData = await request.formData();
-
+  const data = formToJSON(formData);
   const isSpecial = formData.get('is-special') === 'on' ? true : false;
 
-  const data = formToJSON(formData) as CreatePlanProps;
+  const _validation = newPlanSchema.safeParse(data);
 
-  const _plans = await createPlan({
-    ...data,
-    price: Number(data.price),
-    speed: Number(data.speed),
-    isSpecial,
-  });
+  if (_validation.success) {
+    const data = _validation.data;
 
-  if (_plans.ok) {
+    const _create = await createPlan({
+      ...data,
+      price: Number(data.price),
+      speed: Number(data.speed),
+      isSpecial,
+    });
+
+    if (_create.ok) {
+      return json({
+        ok: true,
+      });
+    }
+
     return json({
-      plans: _plans.val,
+      error: _create.val,
     });
   }
 
   return json({
-    error: _plans.val,
+    error: _validation.error.flatten(),
   });
 }

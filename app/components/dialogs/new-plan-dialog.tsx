@@ -1,4 +1,5 @@
 import { useFetcher } from '@remix-run/react';
+import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -11,18 +12,35 @@ import {
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { useDialog } from '~/hooks/use-dialog-store';
+import { ErrorMessage } from '../error-message';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
+
+type IssueType = {
+  formErrors: string[];
+  fieldErrors: {
+    [key: string]: string[];
+  };
+};
 
 export const NewPlanDialog = () => {
   const { isOpen, onClose, type } = useDialog();
   const fetcher = useFetcher();
+  const [issues, setIssues] = useState<IssueType | null>(null);
 
   const isDialogOpen = isOpen && type === 'createPlan';
 
-  const submitForm = () => {
-    onClose();
-  };
+  useEffect(() => {
+    if (fetcher.data) {
+      if ('error' in fetcher.data) {
+        setIssues(fetcher.data.error);
+      } else {
+        setIssues(null);
+      }
+
+      if ('ok' in fetcher.data) onClose();
+    }
+  }, [fetcher.data]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onClose}>
@@ -33,13 +51,15 @@ export const NewPlanDialog = () => {
             Enter the details required for creating a new plan.
           </DialogDescription>
         </DialogHeader>
+        {/* <div>
+          <pre>{JSON.stringify(error, null, 2)}</pre>
+        </div> */}
         <fetcher.Form
           className="grid gap-4 py-4"
-          onSubmit={submitForm}
           method="post"
           action="/plans/create"
         >
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-1">
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
@@ -49,30 +69,41 @@ export const NewPlanDialog = () => {
               placeholder="HOME 499"
               className="col-span-3"
             />
+            {issues?.fieldErrors.name ? (
+              <ErrorMessage>{issues.fieldErrors.name[0]}</ErrorMessage>
+            ) : null}
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-1">
             <Label htmlFor="speed" className="text-right">
               Speed
             </Label>
             <Input
+              type="number"
               id="speed"
               name="speed"
               placeholder="40 mbps"
               className="col-span-3"
             />
+            {issues?.fieldErrors.speed ? (
+              <ErrorMessage>{issues.fieldErrors.speed[0]}</ErrorMessage>
+            ) : null}
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-1">
             <Label htmlFor="price" className="text-right">
               Price
             </Label>
             <Input
+              type="number"
               id="price"
               name="price"
               placeholder="499"
               className="col-span-3"
             />
+            {issues?.fieldErrors.price ? (
+              <ErrorMessage>{issues.fieldErrors.price[0]}</ErrorMessage>
+            ) : null}
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-1">
             <Label htmlFor="description" className="text-right">
               Description
             </Label>
@@ -82,11 +113,11 @@ export const NewPlanDialog = () => {
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="is-special" className="text-right">
-              Special
-            </Label>
+          <div className="flex items-center gap-2">
             <Checkbox id="is-special" name="is-special" />
+            <Label htmlFor="is-special" className="text-right">
+              This is a special plan
+            </Label>
           </div>
           <DialogFooter>
             <Button type="submit" name="__action" value="create">
