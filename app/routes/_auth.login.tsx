@@ -3,7 +3,7 @@ import { json, redirect } from '@remix-run/node';
 import { Form, useActionData, useNavigation } from '@remix-run/react';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { FormField } from '~/components/form-field';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
@@ -11,7 +11,7 @@ import { Label } from '~/components/ui/label';
 import { SITE_TITLE } from '~/consts';
 import { createUserSession, getUser } from '~/lib/session.server';
 import { safeRedirect } from '~/utils';
-import { validateForm } from '~/utils/form.server';
+import { formToJSON } from '~/utils/form.server';
 import { verifyLogin } from '~/utils/login.server';
 
 export const meta: V2_MetaFunction = () => {
@@ -28,9 +28,9 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
-const schema = Yup.object({
-  email: Yup.string().email('Not a valid email').required('Email is required'),
-  password: Yup.string().required('Password is required'),
+const loginSchema = z.object({
+  email: z.string().nonempty('Email is required!').email(),
+  password: z.string().nonempty('Password is required!'),
 });
 
 export async function loader({ request }: LoaderArgs) {
@@ -42,34 +42,35 @@ export async function loader({ request }: LoaderArgs) {
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const redirectTo = safeRedirect(formData.get('redirectTo'), '/');
-  const remember = formData.get('remember');
 
-  try {
-    // validate form
-    const { email, password } = await validateForm(formData, schema);
-    // if not valid error is thrown
-    // if all valid, trigger registration function
-    // if it's a success, redirect the user to the redirectTo
+  const _validation = loginSchema.safeParse(formToJSON(formData));
 
+  // if validation success
+  if (_validation.success) {
+    const { email, password } = _validation.data;
+    const remember = formData.get('remember');
     // check if user already exists and if password matches
-    const user = await verifyLogin(email, password);
-    // if verification fails, error is thrown
-    // if verification is successful, create a new session
-    return createUserSession({
-      request,
-      userId: user.id,
-      remember: remember === 'on' ? true : false,
-      redirectTo,
-    });
-  } catch (errors) {
-    // return error to render in the components
-    return json({ errors }, { status: 400 });
+    const _existingUser = await verifyLogin(email, password);
+
+    if (_existingUser.ok) {
+      return await createUserSession({
+        request,
+        userId: _existingUser.val.id,
+        remember: remember === 'on' ? true : false,
+        redirectTo,
+      });
+    }
+
+    return json({ error: _existingUser.val.message }, { status: 401 });
   }
+
+  return json({ errors: _validation.error.format() }, { status: 400 });
 }
 
 export default function Login() {
   const actionData = useActionData();
   const { state } = useNavigation();
+
   const busy = state === 'submitting';
 
   const [formData, setFormData] = useState({
@@ -97,9 +98,9 @@ export default function Login() {
       </div>
       <Form method="post" className="mx-auto w-full space-y-6 sm:w-[400px]">
         {/* form error message */}
-        {typeof actionData?.errors === 'string' ? (
-          <p className="bg-red-900/50 p-4 text-center font-mono text-red-300">
-            {actionData?.errors}
+        {actionData?.error ? (
+          <p className="rounded-xl bg-red-300/20 p-4 text-center font-mono text-red-500">
+            {actionData?.error}
           </p>
         ) : null}
         {/* email */}
@@ -110,7 +111,7 @@ export default function Login() {
           type="email"
           onChange={handleInputChange}
           value={formData.email}
-          error={actionData?.errors?.['email']}
+          error={actionData?.errors?.email?._errors[0]}
         />
         {/* password */}
         <FormField
@@ -120,7 +121,7 @@ export default function Login() {
           type="password"
           onChange={handleInputChange}
           value={formData.password}
-          error={actionData?.errors?.['password']}
+          error={actionData?.errors?.password?._errors[0]}
         />
         {/* remember me */}
         <div className="flex items-center space-x-2">

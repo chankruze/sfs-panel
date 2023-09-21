@@ -66,6 +66,6 @@ export async function action({ request }: ActionArgs) {
   }
 
   return json({
-    error: _validation.error.flatten(),
+    errors: _validation.error.format(),
   });
 }

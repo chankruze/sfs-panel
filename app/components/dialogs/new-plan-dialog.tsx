@@ -1,5 +1,5 @@
 import { useFetcher } from '@remix-run/react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -16,31 +16,17 @@ import { ErrorMessage } from '../error-message';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
 
-type IssueType = {
-  formErrors: string[];
-  fieldErrors: {
-    [key: string]: string[];
-  };
-};
-
 export const NewPlanDialog = () => {
   const { isOpen, onClose, type } = useDialog();
   const fetcher = useFetcher();
-  const [issues, setIssues] = useState<IssueType | null>(null);
 
   const isDialogOpen = isOpen && type === 'createPlan';
 
   useEffect(() => {
     if (fetcher.data) {
-      if ('error' in fetcher.data) {
-        setIssues(fetcher.data.error);
-      } else {
-        setIssues(null);
-      }
-
       if ('ok' in fetcher.data) onClose();
     }
-  }, [fetcher.data]);
+  }, [fetcher.data, onClose]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onClose}>
@@ -51,9 +37,6 @@ export const NewPlanDialog = () => {
             Enter the details required for creating a new plan.
           </DialogDescription>
         </DialogHeader>
-        {/* <div>
-          <pre>{JSON.stringify(error, null, 2)}</pre>
-        </div> */}
         <fetcher.Form
           className="grid gap-4 py-4"
           method="post"
@@ -69,9 +52,10 @@ export const NewPlanDialog = () => {
               placeholder="HOME 499"
               className="col-span-3"
             />
-            {issues?.fieldErrors.name ? (
-              <ErrorMessage>{issues.fieldErrors.name[0]}</ErrorMessage>
-            ) : null}
+
+            <ErrorMessage>
+              {fetcher.data?.errors?.name?._errors[0]}
+            </ErrorMessage>
           </div>
           <div className="space-y-1">
             <Label htmlFor="speed" className="text-right">
@@ -84,9 +68,9 @@ export const NewPlanDialog = () => {
               placeholder="40 mbps"
               className="col-span-3"
             />
-            {issues?.fieldErrors.speed ? (
-              <ErrorMessage>{issues.fieldErrors.speed[0]}</ErrorMessage>
-            ) : null}
+            <ErrorMessage>
+              {fetcher.data?.errors?.speed?._errors[0]}
+            </ErrorMessage>
           </div>
           <div className="space-y-1">
             <Label htmlFor="price" className="text-right">
@@ -99,9 +83,9 @@ export const NewPlanDialog = () => {
               placeholder="499"
               className="col-span-3"
             />
-            {issues?.fieldErrors.price ? (
-              <ErrorMessage>{issues.fieldErrors.price[0]}</ErrorMessage>
-            ) : null}
+            <ErrorMessage>
+              {fetcher.data?.errors?.price._errors[0]}
+            </ErrorMessage>
           </div>
           <div className="space-y-1">
             <Label htmlFor="description" className="text-right">
